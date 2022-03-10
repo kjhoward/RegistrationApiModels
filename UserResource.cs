@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-namespace JustHelpDesk.Models
+namespace DevConsulting.Models
 {
     public class UserResource
     {
@@ -9,6 +9,11 @@ namespace JustHelpDesk.Models
         public string Username { get; set; }
 
         [JsonIgnore]
-        public string PasswordHash { get; set; }
+        public string PasswordHash { 
+            get { return _passwordHash.Trim(); }
+            set { _passwordHash = value;} 
+        }
+
+        private string _passwordHash;
     }
 }
