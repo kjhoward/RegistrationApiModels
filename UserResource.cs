@@ -1,5 +1,5 @@
 using System.Text.Json.Serialization;
-namespace DevConsulting.RegistrationLoginApi.Models
+namespace DevConsulting.RegistrationLoginApi.Client
 {
     public class UserResource
     {

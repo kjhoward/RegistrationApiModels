@@ -6,7 +6,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 
-namespace DevConsulting.RegistrationLoginApi.Models
+namespace DevConsulting.RegistrationLoginApi.Client
 {
     public interface IJwtUtils
     {

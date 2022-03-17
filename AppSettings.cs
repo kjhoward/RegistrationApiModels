@@ -1,4 +1,4 @@
-namespace DevConsulting.RegistrationLoginApi.Models
+namespace DevConsulting.RegistrationLoginApi.Client
 {
     public class AppSettings
     {
