@@ -14,9 +14,12 @@ namespace DevConsulting.RegistrationLoginApi.Client.Authorization
             var allowAnonymous = context.ActionDescriptor.EndpointMetadata.OfType<AllowAnonymousAttribute>().Any();
             if (allowAnonymous)
                 return;
-
+            
+            var sUserId = context.HttpContext.Session.GetString("userid");
+            long userId = 0;
+            long.TryParse(sUserId, out userId);
             // authorization (for in UserRegistrationAPI)
-            if (CanGetUserFromContext(context))
+            if (userId > 0)
                 return;
             
             //Fallback authorization (for other APIs that won't have the context set)
@@ -24,20 +27,25 @@ namespace DevConsulting.RegistrationLoginApi.Client.Authorization
             var authService =
             context.HttpContext.RequestServices.GetService(typeof(IAuthorizationService))
                 as IAuthorizationService; 
-            
-            if(authService == null)
+
+            var token = context.HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+            if(authService == null || string.IsNullOrEmpty(token)){
                 context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
-            await authService.Authorize(context.HttpContext);
-            if (CanGetUserFromContext(context))
+                return;
+            }
+
+            var userSession = await authService.Authorize(token);
+            await authService.SetContext();
+            
+            //Check the user ID again, should be set now in the context
+            sUserId = context.HttpContext.Session.GetString("userid");
+            long.TryParse(sUserId, out userId);
+            if (userId > 0)
                 return;
 
 
             context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
-        }
-
-        private bool CanGetUserFromContext(AuthorizationFilterContext context){
-            var user = (UserResource)context.HttpContext.Items["User"];
-            return user != null;
         }
     }
 }

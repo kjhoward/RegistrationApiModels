@@ -5,37 +5,47 @@ using Microsoft.AspNetCore.Http;
 namespace DevConsulting.RegistrationLoginApi.Client.Services{
 
     public interface IAuthorizationService{
-        public Task Authorize(HttpContext context);
+        public Task<UserResource?> Authorize(string token);
+        public Task SetContext();
     }
     public class AuthorizationService : IAuthorizationService
     {
-        private readonly HttpClient httpClient;
+        private readonly HttpClient _httpClient;
 
-        private readonly IJwtUtils jwtUtils;
+        private readonly IJwtUtils _jwtUtils;
+
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
 
-        public AuthorizationService(HttpClient httpClient, IJwtUtils utils)
+        public AuthorizationService(HttpClient httpClient, IJwtUtils utils, IHttpContextAccessor httpContextAccessor)
         {
-            this.httpClient = httpClient;
-            jwtUtils = utils;
+            _httpClient = httpClient;
+            _jwtUtils = utils;
+            _httpContextAccessor = httpContextAccessor;
         }
-        public async Task Authorize(HttpContext context)
+        public async Task<UserResource?> Authorize(string token)
         {
             //Authorization (for outside the UserRegistration API)
-            var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            if (token == null)
+                return null;
+            var userId = _jwtUtils.ValidateToken(token);
+            if(userId == null)
+                return null;
+            var result = await _httpClient.AddTokenToHeader(token).GetAsync($"users/{userId.Value}");
+            if(!result.IsSuccessStatusCode)
+                return null;
+            var response = await result.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<UserResource>(response);
+        }
+
+        public async Task SetContext(){
+            var token = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             if (token == null)
                 return;
-            var userId = jwtUtils.ValidateToken(token);
-            if(userId == null)
+            var userSession = await Authorize(token);
+            if(userSession == null)
                 return;
-            var result = await httpClient.AddTokenToHeader(token).GetAsync($"users/{userId.Value}");
-            if(!result.IsSuccessStatusCode)
-                return;
-            var response = await result.Content.ReadAsStringAsync();
-            var userResource =  JsonConvert.DeserializeObject<UserResource>(response);
-
-            //If user wasn't set in the context of whatever API was calling it, set it now
-            context.Items["User"] = userResource;
+            _httpContextAccessor.HttpContext.Session.SetString("userid", userSession.Id.ToString());
         }
     }
 }
