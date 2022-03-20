@@ -36,16 +36,10 @@ namespace DevConsulting.RegistrationLoginApi.Client.Authorization
             }
 
             var userSession = await authService.Authorize(token);
-            await authService.SetContext();
+            if(userSession == null)
+                context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
             
-            //Check the user ID again, should be set now in the context
-            sUserId = context.HttpContext.Session.GetString("userid");
-            long.TryParse(sUserId, out userId);
-            if (userId > 0)
-                return;
-
-
-            context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
+            await authService.SetContext();
         }
     }
 }
