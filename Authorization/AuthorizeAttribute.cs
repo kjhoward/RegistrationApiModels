@@ -26,20 +26,23 @@ namespace DevConsulting.RegistrationLoginApi.Client.Authorization
             //This sets the context going forward so it should only need to be used once until the context is unset again.
             var authService =
             context.HttpContext.RequestServices.GetService(typeof(IAuthorizationService))
-                as IAuthorizationService; 
+                as IAuthorizationService;
+
+            var utils =
+            context.HttpContext.RequestServices.GetService(typeof(IJwtUtils))
+                as IJwtUtils; 
 
             var token = context.HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
-            if(authService == null || string.IsNullOrEmpty(token)){
+            if(utils == null || authService == null || string.IsNullOrEmpty(token)){
                 context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
                 return;
             }
 
-            var userSession = await authService.Authorize(token);
-            if(userSession == null)
+            if(utils.ValidateToken(token) == null)
                 context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
             
-            await authService.SetContext();
+            authService.SetContext();
         }
     }
 }

@@ -1,4 +1,4 @@
-namespace DevConsulting.RegistrationLoginApi.Client.ResponseModels
+namespace DevConsulting.RegistrationLoginApi.Client.Models
 {
     public class AuthenticateResponse
     {
