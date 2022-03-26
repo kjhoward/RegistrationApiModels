@@ -14,13 +14,18 @@ namespace DevConsulting.RegistrationLoginApi.Client.Authorization
             var allowAnonymous = context.ActionDescriptor.EndpointMetadata.OfType<AllowAnonymousAttribute>().Any();
             if (allowAnonymous)
                 return;
-            
-            var sUserId = context.HttpContext.Session.GetString("userid");
-            long userId = 0;
-            long.TryParse(sUserId, out userId);
-            // authorization (for in UserRegistrationAPI)
-            if (userId > 0)
+            try{
+                var sUserId = context.HttpContext.Session.GetString("userid");
+                long userId = 0;
+                long.TryParse(sUserId, out userId);
+                // authorization (for in UserRegistrationAPI)
+                if (userId > 0)
+                    return;
+            }catch(Exception e){
+                //TODO: Some logging here
+                context.Result = new JsonResult(new { message = "Unauthorized" }) { StatusCode = StatusCodes.Status401Unauthorized };
                 return;
+            }
             
             //Fallback authorization (for other APIs that won't have the context set)
             //This sets the context going forward so it should only need to be used once until the context is unset again.
