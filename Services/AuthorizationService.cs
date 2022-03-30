@@ -16,9 +16,8 @@ namespace DevConsulting.RegistrationLoginApi.Client.Services{
         private readonly IHttpContextAccessor _httpContextAccessor;
 
 
-        public AuthorizationService(HttpClient httpClient, IJwtUtils utils, IHttpContextAccessor httpContextAccessor)
+        public AuthorizationService(IJwtUtils utils, IHttpContextAccessor httpContextAccessor)
         {
-            _httpClient = httpClient;
             _jwtUtils = utils;
             _httpContextAccessor = httpContextAccessor;
         }
