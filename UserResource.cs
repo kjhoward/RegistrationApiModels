@@ -9,10 +9,10 @@ namespace DevConsulting.RegistrationLoginApi.Client
         public string Username { get; set; }
         [JsonIgnore]
         public string PasswordHash { 
-            get { return _passwordHash.Trim(); }
+            get { return string.IsNullOrEmpty(_passwordHash) ? "" : _passwordHash.Trim(); }
             set { _passwordHash = value;} 
         }
 
-        private string _passwordHash;
+        private string? _passwordHash;
     }
 }
