@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using DevConsulting.RegistrationLoginApi.Client.Services;
+using DevConsulting.RegistrationLoginApi.Client.Extensions;
 namespace DevConsulting.RegistrationLoginApi.Client.Authorization
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
@@ -15,11 +16,9 @@ namespace DevConsulting.RegistrationLoginApi.Client.Authorization
             if (allowAnonymous)
                 return;
             try{
-                var sUserId = context.HttpContext.Session.GetString("userid");
-                long userId = 0;
-                long.TryParse(sUserId, out userId);
+                var user = context.HttpContext.Session.GetUser("user");
                 // authorization (for in UserRegistrationAPI)
-                if (userId > 0)
+                if (user != null)
                     return;
             }catch(Exception e){
                 //TODO: Some logging here

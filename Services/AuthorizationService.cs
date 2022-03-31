@@ -28,10 +28,12 @@ namespace DevConsulting.RegistrationLoginApi.Client.Services{
             var token = _httpContextAccessor.HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
             if (token == null)
                 return;
-            var userId = _jwtUtils.ValidateToken(token);
-            if(userId == null)
+            var user = _jwtUtils.ValidateToken(token);
+            if(user == null)
                 return;
-            _httpContextAccessor.HttpContext.Session.SetString("userid", userId.ToString());
+            _httpContextAccessor.HttpContext.Session.SetString("userid", user.Id.ToString());
+            _httpContextAccessor.HttpContext.Session.SetString("user", JsonConvert.SerializeObject(user));
         }
+
     }
 }

@@ -14,5 +14,7 @@ namespace DevConsulting.RegistrationLoginApi.Client
         }
 
         private string? _passwordHash;
+
+        public bool IsServiceUser {get;set;}
     }
 }
